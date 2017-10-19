@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
         pthread_attr_init(&attr);
         pthread_create(&tid, &attr, producer, NULL);
        }
-//sleep(2);
+	sleep(2);
     for(j = 0; j < consumerThreads; j++)
         {
         pthread_t tid;
