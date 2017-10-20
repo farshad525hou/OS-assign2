@@ -14,15 +14,15 @@ sem_t full;
 int insertPointer = 0, removePointer = 1;
 void *producer(void *param);
 void *consumer(void *param);
-int insert_item(buffer_item item)
-{
+int insert_item(buffer_item item){
      //Acquire Empty Semaphore
     sem_wait(&empty);
-    //Acquire mutex lock to protect buffer
-    pthread_mutex_lock(&mutex);
-    //printf("%d initem\n",item);
-    buffer[insertPointer++] = item;
-   insertPointer = insertPointer % 5;
+    //Acquire mutex lock to protect buffe
+	pthread_mutex_lock(&mutex);
+    if(buffer[insertPointer]==0){
+      buffer[insertPointer++] = item;
+      insertPointer = insertPointer % 5;
+    }
    // printf("%d in buffr\n",buffer[insertPointer]);
  //   printf("%d inpoint\n",insertPointer);
     //Release mutex lock and full semaphore
@@ -30,21 +30,21 @@ int insert_item(buffer_item item)
      sem_post(&full);
     return 0;
 }
-buffer_item remove_item()
-{
-buffer_item item;
-//Acquire Full Semaphore
-    sem_wait(&full);
+buffer_item remove_item(){
+  buffer_item item;
+  //Acquire Full Semaphore
+  sem_wait(&full);
 //Acquire mutex lock to protect buffer
   pthread_mutex_lock(&mutex);
-//printf("%d rempr\n",removePointer);
-   item = buffer[removePointer];
-//printf("%d inpoint\n",removePointer);
-    buffer[removePointer++] = 0;
-    removePointer = removePointer % 5;  
-    pthread_mutex_unlock(&mutex);
-    sem_post(&empty);
-    return item;
+  //if(buffer[insertPointer]!=0){
+    item = buffer[removePointer];
+    buffer[removePointer] = 0;
+    removePointer++;
+    removePointer = removePointer % 5;
+  //}
+  pthread_mutex_unlock(&mutex);
+  sem_post(&empty);
+  return item;
 }
 int main(int argc, char *argv[])
 {
@@ -59,9 +59,9 @@ int main(int argc, char *argv[])
     producerThreads = atoi(argv[2]);
     consumerThreads = atoi(argv[3]);
     //Initialize the the locks
-    printf("%d\n",pthread_mutex_init(&mutex, NULL));    
-    printf("%d\n",sem_init(&empty, 0, 10))   ;
-    printf("%d\n",sem_init(&full, 0, 0));
+    pthread_mutex_init(&mutex, NULL);
+    sem_init(&empty, 0, 10);
+    sem_init(&full, 0, 0);
     srand(time(0));
 //Create the producer and consumer threads
     for(i = 0; i < 4; i++)
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
         pthread_attr_init(&attr);
         pthread_create(&tid, &attr, producer, NULL);
        }
-	sleep(2);
+	sleep(5);
     for(j = 0; j < consumerThreads; j++)
         {
         pthread_t tid;
@@ -102,7 +102,7 @@ void *consumer(void *param)
 {
     buffer_item random;
     int r,r1;
-   
+
     while(TRUE)
         {
         r = rand() % 3;
