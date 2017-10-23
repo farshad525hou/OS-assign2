@@ -22,15 +22,12 @@ int insertPointer = 0, removePointer = 1;
 void *producer(void *param);
 void *consumer(void *param);
 int insert_item(buffer_item item){
-     //Acquire Empty Semaphore
     sem_wait(&empty);
-    //Acquire mutex lock to protect buffe
 	pthread_mutex_lock(&mutex);
     if(buffer[insertPointer]==0){
       buffer[insertPointer++] = item;
       insertPointer = insertPointer % 3;
     }
-    //Release mutex lock and full semaphore
     pthread_mutex_unlock(&mutex);
     sem_post(&full);
     return 0;
