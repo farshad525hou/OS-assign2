@@ -1,3 +1,10 @@
+/*
+Farshad Chowdhury
+October 23, 2017
+Operating Systems and Kernel Design
+Assignment #2
+Threads and Synchronization
+*/
 //Use a buffer size of 10
 #include "../buffer.h"
 #include <iostream>
@@ -30,9 +37,7 @@ int insert_item(buffer_item item){
 }
 buffer_item remove_item(){
   buffer_item item;
-  //Acquire Full Semaphore
   sem_wait(&full);
-//Acquire mutex lock to protect buffer
   pthread_mutex_lock(&mutex);
     item = buffer[removePointer];
     buffer[removePointer] = 0;
@@ -52,12 +57,10 @@ int main(int argc, char *argv[])
         return -1;
     }
     buyerThreads = atoi(argv[1]);
-    //Initialize the the locks
     pthread_mutex_init(&mutex, NULL);
     sem_init(&empty, 0, 10);
     sem_init(&full, 0, 0);
     srand(time(0));
-//Create the producer and consumer threads
     for(i = 0; i < 4; i++)
     {
         pthread_t tid;
@@ -73,14 +76,13 @@ int main(int argc, char *argv[])
         pthread_attr_init(&attr);
         pthread_create(&tid, &attr, consumer, NULL);
         }
-//usleep for user specified time
     sleep(30);
     return 0;
     }
 void *producer(void *param)
 {
     buffer_item random;
-    int r,r1;
+    int r;
     while(TRUE)
     {
         r = rand() % 3;
@@ -95,13 +97,12 @@ void *producer(void *param)
 void *consumer(void *param)
 {
     buffer_item item_out;
-    int r,r1;
+    int r;
 
     while(TRUE)
         {
         r = rand() % 3;
         sleep(r);
-       // printf("helo");
        item_out=remove_item();
          printf("Buyer bought %d \n", item_out);
         }

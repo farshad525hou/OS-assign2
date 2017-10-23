@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 void *producer(void *param)
 {
     buffer_item random;
-    int r,r1;
+    int r;
     while(TRUE)
     {
         r = rand() % 3;
@@ -86,7 +86,7 @@ void *producer(void *param)
 void *consumer(void *param)
 {
     buffer_item item_out;
-    int r,r1;
+    int r;
 
     while(TRUE)
         {
