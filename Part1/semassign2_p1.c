@@ -4,6 +4,7 @@ October 23, 2017
 Operating Systems and Kernel Design
 Assignment #2
 Threads and Synchronization
+Part1
 */
 //Use a buffer size of 10
 #include "../buffer.h"
@@ -23,25 +24,25 @@ void *producer(void *param);
 void *consumer(void *param);
 int insert_item(buffer_item item){
     sem_wait(&empty);
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&mutex);//grab empty semaphore and lock
     if(buffer[insertPointer]==0){
       buffer[insertPointer++] = item;
       insertPointer = insertPointer % 3;
     }
     pthread_mutex_unlock(&mutex);
-    sem_post(&full);
+    sem_post(&full);//release full semaphore and unlock mutex
     return 0;
 }
 buffer_item remove_item(){
   buffer_item item;
   sem_wait(&full);
-  pthread_mutex_lock(&mutex);
-    item = buffer[removePointer];
-    buffer[removePointer] = 0;
-    removePointer++;
-    removePointer = removePointer % 3;
+  pthread_mutex_lock(&mutex);//grab empty semaphore and lock
+  item = buffer[removePointer];
+  buffer[removePointer] = 0;
+  removePointer++;
+  removePointer = removePointer % 3;
   pthread_mutex_unlock(&mutex);
-  sem_post(&empty);
+  sem_post(&empty);//release full semaphore and unlock mutex
   return item;
 }
 int main(int argc, char *argv[])
@@ -54,11 +55,11 @@ int main(int argc, char *argv[])
         return -1;
     }
     buyerThreads = atoi(argv[1]);
-    pthread_mutex_init(&mutex, NULL);
-    sem_init(&empty, 0, 10);
+    pthread_mutex_init(&mutex, NULL);//Initialize mutex
+    sem_init(&empty, 0, 10);//initialize semaphore
     sem_init(&full, 0, 0);
     srand(time(0));
-    for(i = 0; i < 4; i++)
+    for(i = 0; i < 4; i++)// loop to produce 4 buyer threads
     {
         pthread_t tid;
         pthread_attr_t attr;
@@ -66,7 +67,7 @@ int main(int argc, char *argv[])
         pthread_create(&tid, &attr, producer, NULL);
        }
 	sleep(1);
-    for(j = 0; j < (buyerThreads +2); j++)
+    for(j = 0; j < (buyerThreads +2); j++) //loop to make n+2 buyer threads
         {
         pthread_t tid;
         pthread_attr_t attr;
